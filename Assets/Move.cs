@@ -6,20 +6,23 @@ using UnityEngine;
 public class movePlayer : MonoBehaviour
 {
     private Rigidbody2D rb;
-    public float speed = 20.0f;
+    public float speed = 40.0f;
     private Vector2 moveVector;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        //Console.WriteLine("Hello World!");
-        print("Helo");
     }
 
     void Update()
     {
         moveVector.x = Input.GetAxis("Horizontal");
         moveVector.y = Input.GetAxis("Vertical");
-        rb.MovePosition(rb.position + moveVector * speed * Time.deltaTime);
+
+        // Проверяем столкновение перед движением
+        if (!Physics2D.OverlapCircle(transform.position + (Vector3)moveVector * speed * Time.deltaTime, 0.1f, LayerMask.GetMask("Wall")))
+        {
+            rb.MovePosition(rb.position + moveVector * speed * Time.deltaTime);  // Двигаем игрока
+        }
     }
 }
