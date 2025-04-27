@@ -43,6 +43,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 192023469
+    locked: 0
   - name: Layer 1
     uniqueID: 2425651459
     locked: 0
@@ -51,6 +54,21 @@ TagManager:
     locked: 0
   - name: Layer 3
     uniqueID: 4189426099
+    locked: 0
+  - name: Wall
+    uniqueID: 2213525065
+    locked: 0
+  - name: Enemy
+    uniqueID: 2209597449
+    locked: 0
+  - name: Bullet
+    uniqueID: 2942757365
+    locked: 0
+  - name: Player
+    uniqueID: 3865674159
+    locked: 0
+  - name: UI
+    uniqueID: 1651597661
     locked: 0
   m_RenderingLayers:
   - Default
