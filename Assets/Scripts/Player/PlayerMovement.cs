@@ -3,8 +3,8 @@ using UnityEngine;
 // Гарантируем наличие необходимых компонентов на игровом объекте
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInput))]
-// Позже добавим PlayerAnimator
-// [RequireComponent(typeof(PlayerAnimator))]
+[RequireComponent(typeof(PlayerAnimator))]
+[RequireComponent(typeof(PlayerStamina))] // Добавляем зависимость от стамины
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Настройки Движения")]
@@ -26,7 +26,8 @@ public class PlayerMovement : MonoBehaviour
     // --- Приватные Поля ---
     private Rigidbody2D _rb;
     private PlayerInput _playerInput;
-    // private PlayerAnimator _playerAnimator; // Ссылка на аниматор (добавим позже)
+    private PlayerAnimator _playerAnimator; // Теперь ссылка используется
+    private PlayerStamina _playerStamina; // Добавляем ссылку на стамину
 
     private bool _isJumping = false; // Флаг для состояния прыжка (если он длительный)
     private float _rollTimer = 0f;
@@ -39,7 +40,8 @@ public class PlayerMovement : MonoBehaviour
         // Получаем ссылки на компоненты
         _rb = GetComponent<Rigidbody2D>();
         _playerInput = GetComponent<PlayerInput>();
-        // _playerAnimator = GetComponent<PlayerAnimator>(); // Получим позже
+        _playerAnimator = GetComponent<PlayerAnimator>(); // Получаем аниматор
+        _playerStamina = GetComponent<PlayerStamina>(); // Получаем стамину
     }
 
     private void Update()
@@ -91,12 +93,9 @@ public class PlayerMovement : MonoBehaviour
         if (_playerInput.JumpTriggered && CanJump())
         {
             _isJumping = true; // Устанавливаем флаг
-            // Здесь логика самого прыжка:
-            // 1. Визуальный эффект/Анимация (через PlayerAnimator)
-            // _playerAnimator.TriggerJump();
-            // 2. Физический импульс (если нужно)
-             _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse); // Пример: небольшой вертикальный толчок
-             Debug.Log("Jump Triggered!");
+            _playerAnimator.TriggerJump(); // Вызываем метод аниматора
+            _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse); // Пример: небольшой вертикальный толчок
+            Debug.Log("Jump Triggered!");
             // 3. Временная неуязвимость? (логика в PlayerCombat)
             // 4. Сброс флага _isJumping через время или по анимации/приземлению (если нужно)
              Invoke(nameof(StopJumping), 0.1f); // Пример: очень короткий прыжок
@@ -109,25 +108,30 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleRollStart()
     {
-        // Начинаем перекат, если получена команда и персонаж может катиться
+        // Начинаем перекат, если есть команда И достаточно стамины
         if (_playerInput.RollTriggered && CanRoll())
         {
-            IsRolling = true;
-            _rollTimer = rollDuration;
-
-            // Определяем направление переката: приоритет у ввода движения, затем у взгляда
-            if (_playerInput.MoveInput.sqrMagnitude > 0.1f)
+            // Пытаемся потратить стамину
+            if (_playerStamina.TrySpendStamina(_playerStamina.rollStaminaCost))
             {
-                _rollDirection = _playerInput.MoveInput.normalized;
-            }
-            else
-            {
-                _rollDirection = _playerInput.AimDirection.normalized; // Используем направление взгляда если стоим
-            }
+                // Стамины хватило, начинаем перекат
+                IsRolling = true;
+                _rollTimer = rollDuration;
 
-            // Возможно, запуск анимации переката
-            // _playerAnimator.TriggerRoll();
-             Debug.Log("Roll Triggered! Direction: " + _rollDirection);
+                // Определяем направление переката: приоритет у ввода движения, затем у взгляда
+                if (_playerInput.MoveInput.sqrMagnitude > 0.1f)
+                {
+                    _rollDirection = _playerInput.MoveInput.normalized;
+                }
+                else
+                {
+                    _rollDirection = _playerInput.AimDirection.normalized; // Используем направление взгляда если стоим
+                }
+
+                _playerAnimator.TriggerRoll(); // Вызываем метод аниматора
+                Debug.Log("Roll Triggered! Direction: " + _rollDirection);
+            }
+            // else Debug.Log("Failed to Roll - Not enough stamina!");
         }
     }
 
@@ -166,8 +170,10 @@ public class PlayerMovement : MonoBehaviour
 
     private bool CanRoll()
     {
-        // Можно катиться, если не в перекате и не в прыжке (или другие условия?)
-        return !IsRolling && !_isJumping; // Добавь && isGrounded если есть понятие земли
+        // Добавляем проверку стамины
+        // (Проверка HasEnoughStamina здесь не обязательна, т.к. есть TrySpendStamina,
+        // но может быть полезна для UI, чтобы показать, возможно ли действие)
+        return !IsRolling && !_isJumping && _playerStamina.HasEnoughStamina(_playerStamina.rollStaminaCost);
     }
 
      private bool CanJump()

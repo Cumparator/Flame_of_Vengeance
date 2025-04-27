@@ -2,6 +2,8 @@ using UnityEngine;
 
 // Гарантируем наличие необходимых компонентов
 [RequireComponent(typeof(PlayerInput))]
+[RequireComponent(typeof(PlayerAnimator))] // Теперь аниматор точно нужен
+[RequireComponent(typeof(PlayerStamina))] // Добавляем зависимость от стамины
 // Позже добавим PlayerMovement и PlayerAnimator, если нужно будет проверять их состояние
 // [RequireComponent(typeof(PlayerMovement))]
 // [RequireComponent(typeof(PlayerAnimator))]
@@ -15,7 +17,8 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private float meleeAttackDistance = 0.5f; // Смещение центра проверки от игрока
     [SerializeField] private float meleeAttackRadius = 0.6f;   // Радиус круга атаки
     [SerializeField] private int meleeDamage = 50;
-    [SerializeField] private float meleeRate = 1f; // Атак в секунду (1 / время перезарядки)
+    [SerializeField] private float meleeRate = 1f; // Атак в секунду (1 / время перезарядки) - теперь это скорее минимальный интервал
+    [SerializeField] private float meleeComboResetTime = 1.0f; // Время для сброса комбо
     [SerializeField] private GameObject meleeEffectPrefab; // Префаб эффекта удара
 
     [Header("Настройки Дальнего Боя")]
@@ -25,29 +28,36 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("Настройки Блока")]
     [SerializeField] private bool canBlock = true; // Включен ли блок?
-    // Добавь сюда параметры блока, если нужно (например, снижение урона)
+    // Стоимость блока теперь берется из PlayerStamina
+    // [SerializeField] private float blockInitialStaminaCost = 5f; 
     public bool IsBlocking { get; private set; } // Состояние блока для других скриптов (например, аниматора)
 
     // --- Приватные Поля --- 
     private PlayerInput _playerInput;
     private PlayerMovement _playerMovement; // Может понадобиться для проверки CanAttack
-    // private PlayerAnimator _playerAnimator; // Для запуска анимаций атаки/блока
+    private PlayerAnimator _playerAnimator; // Теперь ссылка обязательна
+    private PlayerStamina _playerStamina; // Добавляем ссылку на стамину
 
     private float _nextMeleeTime = 0f;
     private float _nextRangedTime = 0f;
+    private int _currentAttack = 0; // Счетчик для комбо
+    private float _timeSinceLastAttack = 0f;
 
     // --- Методы Жизненного Цикла Unity ---
 
     private void Awake()
     {
         _playerInput = GetComponent<PlayerInput>();
-        // Попробуем получить PlayerMovement, если он есть
+        _playerAnimator = GetComponent<PlayerAnimator>(); // Получаем аниматор
+        _playerStamina = GetComponent<PlayerStamina>(); // Получаем стамину
         TryGetComponent<PlayerMovement>(out _playerMovement);
-        // _playerAnimator = GetComponent<PlayerAnimator>(); // Получим позже
     }
 
     private void Update()
     {
+        // Увеличиваем таймер с момента последней атаки для сброса комбо
+        _timeSinceLastAttack += Time.deltaTime;
+
         HandleAttackInput();
         HandleBlocking();
     }
@@ -65,16 +75,35 @@ public class PlayerCombat : MonoBehaviour
         // Получаем направление из PlayerInput
         Vector2 attackDirection = _playerInput.AimDirection; 
 
-        // Ближняя атака
+        // Ближняя атака (Комбо)
         if (_playerInput.MeleeTriggered && Time.time >= _nextMeleeTime)
         {
-            PerformMeleeAttack(attackDirection);
-            _nextMeleeTime = Time.time + 1f / meleeRate; // Рассчитываем время следующей атаки
+            // Сбрасываем комбо, если прошло много времени
+            if (_timeSinceLastAttack > meleeComboResetTime)
+            {
+                _currentAttack = 0;
+            }
+
+            _currentAttack++;
+
+            // Возвращаем на первую атаку после третьей
+            if (_currentAttack > 3)
+            {
+                _currentAttack = 1;
+            }
+
+            // Выполняем атаку
+            PerformMeleeAttack(attackDirection, _currentAttack);
+
+            // Сбрасываем таймеры
+            _timeSinceLastAttack = 0f;
+            _nextMeleeTime = Time.time + 1f / meleeRate; 
         }
 
-        // Дальняя атака
+        // Дальняя атака (прерывает комбо ближнего боя)
         if (_playerInput.RangedTriggered && Time.time >= _nextRangedTime)
         {
+             _currentAttack = 0; // Сбрасываем комбо ближнего боя
             PerformRangedAttack(attackDirection);
             _nextRangedTime = Time.time + 1f / rangedRate;
         }
@@ -88,26 +117,40 @@ public class PlayerCombat : MonoBehaviour
             return;
         } 
         
-        // Можно ли блокировать? (не в перекате и т.д.)
-        if (CanBlock())
+        bool previousBlockingState = IsBlocking;
+        bool blockInputHeld = _playerInput.BlockHeld;
+
+        // Пытаемся НАЧАТЬ блок
+        if (blockInputHeld && !IsBlocking && CanBlock()) // Если зажата кнопка, не блокировали и можем начать
         {
-            IsBlocking = _playerInput.BlockHeld;
-            // Возможно, здесь нужно сообщить аниматору
-            // _playerAnimator.SetBlocking(IsBlocking);
-            if(IsBlocking) Debug.Log("Blocking!");
+            // Пытаемся потратить начальную стоимость блока
+            if (_playerStamina.TrySpendStamina(_playerStamina.blockInitialStaminaCost))
+            {
+                IsBlocking = true; // Начинаем блок только если хватило стамины
+            }
+            // else Debug.Log("Failed to Block - Not enough stamina!");
         }
-        else
+        // Пытаемся ЗАКОНЧИТЬ блок
+        else if (!blockInputHeld && IsBlocking) // Если кнопка отпущена и блокировали
         {
             IsBlocking = false;
-             // _playerAnimator.SetBlocking(false);
+        }
+
+        // Сообщаем аниматору об изменении состояния блока
+        if(IsBlocking != previousBlockingState)
+        {
+             _playerAnimator.SetBlocking(IsBlocking);
+             if(IsBlocking) Debug.Log("Blocking Started!");
+             else Debug.Log("Blocking Stopped!");
         }
     }
 
     // --- Выполнение Атак --- 
 
-    private void PerformMeleeAttack(Vector2 direction)
+    private void PerformMeleeAttack(Vector2 direction, int attackNumber)
     {
-        Debug.Log("Melee Attack Triggered! Direction: " + direction);
+        Debug.Log($"Melee Attack {attackNumber} Triggered! Direction: {direction}");
+        _playerAnimator.TriggerMeleeAttack(attackNumber);
 
         // Рассчитываем точку проверки попадания
         Vector2 origin = (Vector2)transform.position + direction * meleeAttackDistance;
@@ -128,9 +171,6 @@ public class PlayerCombat : MonoBehaviour
             }
         }
 
-        // Запуск анимации (позже, через PlayerAnimator)
-        // _playerAnimator.TriggerMeleeAttack(direction);
-
         // Создание визуального эффекта
         if (meleeEffectPrefab != null)
         {
@@ -145,9 +185,7 @@ public class PlayerCombat : MonoBehaviour
     private void PerformRangedAttack(Vector2 direction)
     {
         Debug.Log("Ranged Attack Triggered! Direction: " + direction);
-
-        // Запуск анимации (позже)
-        // _playerAnimator.TriggerRangedAttack(direction);
+        _playerAnimator.TriggerRangedAttack();
 
         // Создание снаряда
         if (projectilePrefab != null)
@@ -190,9 +228,9 @@ public class PlayerCombat : MonoBehaviour
 
      private bool CanBlock()
     { 
-        // Нельзя блокировать во время переката
+        // Проверяем не только перекат, но и достаточность стамины для НАЧАЛА блока
         bool isRolling = _playerMovement != null && _playerMovement.IsRolling;
-        return !isRolling; // Добавь другие условия если нужно
+        return !isRolling && _playerStamina.HasEnoughStamina(_playerStamina.blockInitialStaminaCost);
     }
 
     // --- Визуализация для Редактора --- 
