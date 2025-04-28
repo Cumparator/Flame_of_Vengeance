@@ -2,36 +2,44 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    public float speed = 5f;
-    public int damage = 10;
-    private Vector3 direction;
+    [Tooltip("Скорость снаряда")][SerializeField] private float speed = 5f;
+    private int _damage = 10;
+    private Vector3 _direction;
 
-    void Start()
+    [Tooltip("Время жизни снаряда в секундах")][SerializeField] private float lifetime = 5f; 
+
+    public void Initialize(Vector3 targetDirection, int projectileDamage)
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-            direction = (player.transform.position - transform.position).normalized;
-
-        Destroy(gameObject, 5f); // ��������������� ����� 5 ������
+        _direction = targetDirection.normalized; // Нормализуем на всякий случай
+        _damage = projectileDamage;
+        
+        Destroy(gameObject, lifetime);
     }
 
     void Update()
     {
-        transform.position += direction * speed * Time.deltaTime;
+        if (_direction != Vector3.zero)
+        {
+            transform.position += _direction * speed * Time.deltaTime;
+        }
+        else
+        {   // Если направление не задано (ошибка инициализации?), уничтожаем
+            Debug.LogWarning("Projectile direction not set!", this);
+            Destroy(gameObject);
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Wall")) // ���� ������ � �����
+        if (other.CompareTag("Wall"))
         {
             Destroy(gameObject);
             return;
         }
 
-        var playerHealth = other.GetComponent<PlayerHealth>();
-        if (playerHealth != null)
+        if(other.TryGetComponent<PlayerHealth>(out PlayerHealth playerHealth))
         {
-            playerHealth.TakeDamage(damage);
+            playerHealth.TakeDamage(_damage);
             Destroy(gameObject);
         }
     }

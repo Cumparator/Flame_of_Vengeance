@@ -13,6 +13,7 @@ public class RangeEnemy : MonoBehaviour
     [SerializeField] private float shootInterval = 2f;
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform firePoint;
+    [SerializeField] private int projectileDamage = 10; // Добавляем урон снаряда для врага
     [SerializeField] private LayerMask wallMask; // Слой маски для препятствий
 
     // Рассмотрите внедрение зависимости от игрока вместо поиска по тегу для лучшей тестируемости
@@ -25,24 +26,22 @@ public class RangeEnemy : MonoBehaviour
     void Start()
     {
         // Ищем объект игрока - рассмотрите внедрение зависимостей для лучшего разделения
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        var playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
         {
             _player = playerObject.transform;
         }
         else
         {
-            Debug.LogError("Игрок не найден! Врагу RangeEnemy нужна цель.", this);
-            // Отключаем врага, если игрок не найден, чтобы предотвратить ошибки
             enabled = false;
             return;
         }
-        _nextShotTime = Time.time + shootInterval; // Инициализируем время следующего выстрела
+        _nextShotTime = Time.time + shootInterval;
     }
 
     void Update()
     {
-        if (_player == null) return; // Не должно произойти, если логика в Start верна, но безопасность прежде всего
+        if (!_player) return;
 
         UpdateTargetInfo();
         HandleMovement();
@@ -55,39 +54,30 @@ public class RangeEnemy : MonoBehaviour
         _directionToPlayer = (_player.position - transform.position).normalized;
 
         // Единая проверка raycast на видимость и препятствия
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, _directionToPlayer, _distanceToPlayer, wallMask);
-        _canSeePlayer = hit.collider == null; // Игрок виден, если луч не столкнулся со стеной
+        var hit = Physics2D.Raycast(transform.position, _directionToPlayer, _distanceToPlayer, wallMask);
+        _canSeePlayer = !hit.collider;
     }
 
     private void HandleMovement()
     {
-        // Двигаться только если игрок виден (или решить, как вести себя, когда игрок скрыт)
-        if (_canSeePlayer)
+        if (!_canSeePlayer) return;
+        
+        if (_distanceToPlayer > preferredDistance + distanceBuffer)
         {
-            if (_distanceToPlayer > preferredDistance + distanceBuffer)
-            {
-                MoveTowards(_directionToPlayer);
-            }
-            else if (_distanceToPlayer < preferredDistance - distanceBuffer)
-            {
-                MoveAway(_directionToPlayer);
-            }
-            // Опционально: Добавить стрейф или другую логику движения здесь
+            MoveTowards(_directionToPlayer);
         }
-        // else
-        // {
-        //     // Опционально: Определить поведение, когда игрок не виден (например, патрулирование, поиск)
-        // }
+        else if (_distanceToPlayer < preferredDistance - distanceBuffer)
+        {
+            MoveAway(_directionToPlayer);
+        }
+        // Опционально: Добавить стрейф или другую логику движения здесь
     }
 
     private void HandleShooting()
     {
-        // Стрелять, только если игрок виден и прошел интервал
-        if (_canSeePlayer && Time.time >= _nextShotTime)
-        {
-            Shoot();
-            _nextShotTime = Time.time + shootInterval; // Сбрасываем таймер для следующего выстрела
-        }
+        if (!_canSeePlayer || !(Time.time >= _nextShotTime)) return;
+        Shoot();
+        _nextShotTime = Time.time + shootInterval;
     }
 
     void MoveTowards(Vector2 direction)
@@ -102,21 +92,15 @@ public class RangeEnemy : MonoBehaviour
         transform.position -= (Vector3)direction * moveSpeed * Time.deltaTime;
     }
 
-    // Логика CanSeePlayer теперь интегрирована в UpdateTargetInfo
-
     void Shoot()
     {
-        if (projectilePrefab != null && firePoint != null)
-        {
-            // Рассмотрите использование пула объектов для снарядов для повышения производительности
-            GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.LookRotation(Vector3.forward, _directionToPlayer)); // Поворачиваем снаряд в сторону игрока
+        if (projectilePrefab == null || firePoint == null) return;
+        var projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.LookRotation(Vector3.forward, _directionToPlayer));
 
-            // Возможно, добавить эффект вспышки или звук выстрела здесь
-        }
-        else
+        var projectileScript = projectileGO.GetComponent<Projectile>();
+        if (projectileScript)
         {
-            if(projectilePrefab == null) Debug.LogWarning("Префаб снаряда не назначен.", this);
-            if(firePoint == null) Debug.LogWarning("Точка выстрела не назначена.", this);
+            projectileScript.Initialize(_directionToPlayer, projectileDamage);
         }
     }
 }

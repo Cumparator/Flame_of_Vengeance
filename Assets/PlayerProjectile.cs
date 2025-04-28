@@ -1,4 +1,5 @@
 using UnityEngine;
+using FlameOfVengeance.Interfaces;
 
 public class PlayerProjectile : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class PlayerProjectile : MonoBehaviour
 
     void Start()
     {
-        Destroy(gameObject, 1f); // ��������������� ����� 2 �������
+        Destroy(gameObject, 1f); // ��������������� ����� 2 �������
     }
 
     public void SetDirection(Vector2 dir)
@@ -23,11 +24,15 @@ public class PlayerProjectile : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        EnemyHealth enemy = other.GetComponent<EnemyHealth>();
-        if (enemy != null)
+        // Ищем любой компонент, реализующий IDamageable
+        IDamageable damageableObject = other.GetComponent<IDamageable>(); 
+        if (damageableObject != null)
         {
-            enemy.TakeDamage(damage);
-            Destroy(gameObject); // ���������� ���� ��� ���������
+            // Если нашли такой объект, наносим ему урон
+            damageableObject.TakeDamage(damage); 
+            Destroy(gameObject); // Уничтожаем снаряд
         }
+        // Можно добавить проверку на другие типы объектов, если нужно
+        // else if (other.CompareTag("Obstacle")) { Destroy(gameObject); }
     }
 }

@@ -11,6 +11,5 @@ public class DamageDealer : MonoBehaviour
         {
             playerHealth.TakeDamage(damageAmount);
         }
-        print("Collision detected");
     }
 }
