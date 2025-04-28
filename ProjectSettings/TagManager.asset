@@ -46,26 +46,11 @@ TagManager:
   - name: Background
     uniqueID: 192023469
     locked: 0
-  - name: Layer 1
-    uniqueID: 2425651459
+  - name: Entities
+    uniqueID: 4212676371
     locked: 0
-  - name: Layer 2
-    uniqueID: 4250941897
-    locked: 0
-  - name: Layer 3
-    uniqueID: 4189426099
-    locked: 0
-  - name: Wall
-    uniqueID: 2213525065
-    locked: 0
-  - name: Enemy
-    uniqueID: 2209597449
-    locked: 0
-  - name: Bullet
-    uniqueID: 2942757365
-    locked: 0
-  - name: Player
-    uniqueID: 3865674159
+  - name: Foreground
+    uniqueID: 747546507
     locked: 0
   - name: UI
     uniqueID: 1651597661

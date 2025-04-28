@@ -13,6 +13,16 @@ PrefabInstance:
       propertyPath: speed
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 6470415557129177135, guid: 189c9b93fc4b54d489dad81da193b331,
+        type: 3}
+      propertyPath: m_SortingLayer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6470415557129177135, guid: 189c9b93fc4b54d489dad81da193b331,
+        type: 3}
+      propertyPath: m_SortingLayerID
+      value: -82290925
+      objectReference: {fileID: 0}
     - target: {fileID: 7663271967279320610, guid: 189c9b93fc4b54d489dad81da193b331,
         type: 3}
       propertyPath: m_Name

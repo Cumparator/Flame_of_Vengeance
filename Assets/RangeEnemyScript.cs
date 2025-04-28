@@ -111,19 +111,6 @@ public class RangeEnemy : MonoBehaviour
             // Рассмотрите использование пула объектов для снарядов для повышения производительности
             GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.LookRotation(Vector3.forward, _directionToPlayer)); // Поворачиваем снаряд в сторону игрока
 
-            // Получаем SpriteRenderer созданного снаряда
-            SpriteRenderer projectileRenderer = projectileGO.GetComponent<SpriteRenderer>();
-            if (projectileRenderer != null)
-            {
-                // Устанавливаем сортировочный слой
-                projectileRenderer.sortingLayerName = "Bullet"; // Имя слоя с большой буквы
-            }
-            else
-            {
-                // Если у префаба снаряда нет SpriteRenderer, сообщим об этом
-                Debug.LogWarning("У префаба снаряда отсутствует компонент SpriteRenderer.", projectileGO);
-            }
-
             // Возможно, добавить эффект вспышки или звук выстрела здесь
         }
         else
