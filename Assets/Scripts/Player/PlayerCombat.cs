@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections; // Добавляем для корутин
 
 // Гарантируем наличие необходимых компонентов
 [RequireComponent(typeof(PlayerInput))]
@@ -19,6 +20,7 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private int meleeDamage = 50;
     [SerializeField] private float meleeRate = 1f; // Атак в секунду (1 / время перезарядки) - теперь это скорее минимальный интервал
     [SerializeField] private float meleeComboResetTime = 1.0f; // Время для сброса комбо
+    [SerializeField] private float meleeDamageDelay = 0.15f; // Задержка перед нанесением урона (сек)
     [SerializeField] private GameObject meleeEffectPrefab; // Префаб эффекта удара
 
     [Header("Настройки Дальнего Боя")]
@@ -149,36 +151,43 @@ public class PlayerCombat : MonoBehaviour
 
     private void PerformMeleeAttack(Vector2 direction, int attackNumber)
     {
-        Debug.Log($"Melee Attack {attackNumber} Triggered! Direction: {direction}");
+        Debug.Log($"Melee Attack {attackNumber} Started! Direction: {direction}");
+
+        // 1. Запускаем анимацию
         _playerAnimator.TriggerMeleeAttack(attackNumber);
 
-        // Рассчитываем точку проверки попадания
-        Vector2 origin = (Vector2)transform.position + direction * meleeAttackDistance;
-        
+        // 2. Рассчитываем точку проверки и эффекта (заранее)
+        Vector2 hitOrigin = (Vector2)transform.position + direction * meleeAttackDistance;
+
+        // 3. Создаем визуальный эффект (сразу)
+        if (meleeEffectPrefab != null)
+        {
+            Instantiate(meleeEffectPrefab, hitOrigin, Quaternion.identity); 
+        }
+
+        // 4. Запускаем корутину для нанесения урона с задержкой
+        StartCoroutine(ApplyMeleeDamageAfterDelay(hitOrigin, meleeAttackRadius, meleeDamage));
+    }
+
+    // Корутина для отложенного урона
+    private IEnumerator ApplyMeleeDamageAfterDelay(Vector2 origin, float radius, int damage)
+    {
+        // Ждем указанную задержку
+        yield return new WaitForSeconds(meleeDamageDelay);
+
+        Debug.Log("Applying Melee Damage Now...");
         // Ищем врагов в зоне поражения
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(origin, meleeAttackRadius, enemyLayer);
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(origin, radius, enemyLayer);
 
         // Наносим урон найденным врагам
         foreach (Collider2D enemyCollider in hitEnemies)
         {
-            // Пытаемся получить компонент здоровья врага
-            // Рассмотри использование интерфейса IDamageable для гибкости
             EnemyHealth health = enemyCollider.GetComponent<EnemyHealth>();
             if (health != null)
             {
-                health.TakeDamage(meleeDamage); 
-                Debug.Log($"Hit enemy: {enemyCollider.name}");
+                health.TakeDamage(damage); 
+                Debug.Log($"Delayed Hit enemy: {enemyCollider.name}");
             }
-        }
-
-        // Создание визуального эффекта
-        if (meleeEffectPrefab != null)
-        {
-             // Эффект в точке контакта или на персонаже?
-            Vector3 effectPos = origin; // Пример: эффект в центре зоны поражения
-            // Возможно, повернуть эффект по направлению атаки?
-            // Quaternion effectRotation = Quaternion.LookRotation(Vector3.forward, direction); 
-            Instantiate(meleeEffectPrefab, effectPos, Quaternion.identity); 
         }
     }
 
