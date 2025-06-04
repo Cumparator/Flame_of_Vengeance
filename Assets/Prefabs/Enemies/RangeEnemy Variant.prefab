@@ -8,6 +8,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 698779835132831582, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: m_SpriteTilingProperty.pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 698779835132831582, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 698779835132831582, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 967033222447474878, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -60,6 +75,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1288461270117544752, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: f2ed27d6c1c3ccc48959bcca269d88f0,
+        type: 3}
+    - target: {fileID: 1288461270117544752, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
       propertyPath: m_SortingLayer
       value: 2
       objectReference: {fileID: 0}
@@ -67,6 +88,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SortingLayerID
       value: -82290925
+      objectReference: {fileID: 0}
+    - target: {fileID: 1288461270117544752, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: m_SpriteSortPoint
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3641236210536718994, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
@@ -76,7 +102,22 @@ PrefabInstance:
     - target: {fileID: 3641236210536718994, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
       propertyPath: moveSpeed
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3641236210536718994, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: shootInterval
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3641236210536718994, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: detectionRadius
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 3641236210536718994, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: projectileDamage
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3641236210536718994, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
@@ -93,6 +134,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_BodyType
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6085984726703904400, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: m_Constraints
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6085984726703904400, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
@@ -114,6 +160,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 6393587096123223499, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
     - target: {fileID: 7119619742941967792, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
       propertyPath: m_Layer
@@ -125,16 +176,16 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6393587096123223499, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 5945908776855816611}
+    - targetCorrespondingSourceObject: {fileID: 6393587096123223499, guid: 95903e188b3fa1445bd299e465901a8a,
+        type: 3}
       insertIndex: -1
       addedObject: {fileID: 1660247334094109832}
     - targetCorrespondingSourceObject: {fileID: 6393587096123223499, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4529704111054893260}
-    - targetCorrespondingSourceObject: {fileID: 6393587096123223499, guid: 95903e188b3fa1445bd299e465901a8a,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5945908776855816611}
     - targetCorrespondingSourceObject: {fileID: 6393587096123223499, guid: 95903e188b3fa1445bd299e465901a8a,
         type: 3}
       insertIndex: -1
@@ -146,6 +197,28 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 9032719507261001526}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &5945908776855816611
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2729250772452287229}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b95265f99b6d90e438df1308a89c8bab, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &1660247334094109832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,32 +244,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba8b435a8dc3f604e9a13c4acd7081c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 2
-  detectionRadius: 8
+  moveSpeed: 6
+  detectionRadius: 20
   attackRadius: 1.5
   attackRate: 1
---- !u!95 &5945908776855816611
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2729250772452287229}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  attackDamage: 5
+  banditDamageDelay: 0.5
+  attackOffset: {x: 0.5, y: 0}
 --- !u!114 &5510686373172491935
 MonoBehaviour:
   m_ObjectHideFlags: 0

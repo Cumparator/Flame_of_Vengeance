@@ -2,16 +2,22 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    public GameObject banditPrefab;
-    public GameObject rangeEnemyPrefab;
-    public Transform player;
+    [SerializeField] private GameObject banditPrefab;
+    [SerializeField] private GameObject rangeEnemyPrefab;
+    [SerializeField] private Transform player;
 
-    public float spawnRadius = 20f;
-    public int banditsPerSpawn = 3;
-    public int rangeEnemyPerSpawn = 2;
-    public float spawnCooldown = 5f;
+    [SerializeField] private float spawnRadius = 20f;
+    [SerializeField] private int banditsPerSpawn = 3;
+    [SerializeField] private int rangeEnemyPerSpawn = 2;
+    [SerializeField] private float spawnCooldown = 5f;
 
-    private float nextSpawnTime = 10f;
+    private float nextSpawnTime = 2f;
+
+    // РћРіСЂР°РЅРёС‡РµРЅРёСЏ РїРѕ РєРѕРѕСЂРґРёРЅР°С‚Р°Рј
+    private float minX = -40f;
+    private float maxX = 46f;
+    private float minY = -19f;
+    private float maxY = 22f;
 
     void Update()
     {
@@ -26,28 +32,35 @@ public class EnemySpawner : MonoBehaviour
     {
         for (int i = 0; i < banditsPerSpawn; i++)
         {
-            Vector3 spawnPosition = GetPointOnSpawnRadius();
+            Vector3 spawnPosition = GetPointInBounds();
             Instantiate(banditPrefab, spawnPosition, Quaternion.identity);
         }
 
         for (int i = 0; i < rangeEnemyPerSpawn; i++)
         {
-            Vector3 spawnPosition = GetPointOnSpawnRadius();
+            Vector3 spawnPosition = GetPointInBounds();
             Instantiate(rangeEnemyPrefab, spawnPosition, Quaternion.identity);
+        }
+
+        if (spawnCooldown >= 1)
+        {
+            spawnCooldown *= 0.9f;
         }
     }
 
-    Vector3 GetPointOnSpawnRadius()
+    Vector3 GetPointInBounds()
     {
-        // Случайное направление по XY
+        // РЎР»СѓС‡Р°Р№РЅР°СЏ РїРѕР·РёС†РёСЏ РЅР° СЂР°РґРёСѓСЃРµ РІРѕРєСЂСѓРі РёРіСЂРѕРєР°
         Vector2 randomDirection = Random.insideUnitCircle.normalized;
-
-        // Позиция на радиусе
         Vector3 spawnPosition = new Vector3(
             player.position.x + randomDirection.x * spawnRadius,
             player.position.y + randomDirection.y * spawnRadius,
-            0f // по Z ставим 0, если надо
+            0f
         );
+
+        // РћРіСЂР°РЅРёС‡РёРІР°РµРј РїРѕР·РёС†РёСЋ РІ РґРѕРїСѓСЃС‚РёРјС‹С… РіСЂР°РЅРёС†Р°С…
+        spawnPosition.x = Mathf.Clamp(spawnPosition.x, minX, maxX);
+        spawnPosition.y = Mathf.Clamp(spawnPosition.y, minY, maxY);
 
         return spawnPosition;
     }

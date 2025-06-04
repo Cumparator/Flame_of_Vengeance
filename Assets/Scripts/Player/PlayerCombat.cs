@@ -56,6 +56,12 @@ namespace Player
 
             HandleAttackInput();
             HandleBlocking();
+
+            // Добавляем вызов SetBlockingState в PlayerMovement при изменении IsBlocking
+            if (_playerMovement != null)
+            {
+                _playerMovement.SetBlockingState(IsBlocking);
+            }
         }
 
         private void HandleAttackInput()
@@ -110,7 +116,13 @@ namespace Player
             var previousBlockingState = IsBlocking;
             var blockInputHeld = _playerInput.BlockHeld;
 
-            switch (blockInputHeld)
+            // Добавляем проверку на наличие выносливости для поддержания блока
+            if (IsBlocking && !_playerStamina.HasEnoughStamina(0.1f)) // Проверяем, что выносливость больше небольшого значения, чтобы избежать блокировки с 0 стамины
+            {
+                IsBlocking = false;
+            }
+            // Если выносливость закончилась, даже если кнопка держится, блок сбрасывается
+            else switch (blockInputHeld)
             {
                 case true when !IsBlocking && CanBlock():
                 {

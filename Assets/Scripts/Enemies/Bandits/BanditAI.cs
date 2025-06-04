@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections;
+using FlameOfVengeance.Interfaces;
 
 public class BanditAI : MonoBehaviour {
     private static readonly int AnimState = Animator.StringToHash("AnimState");
@@ -13,6 +15,12 @@ public class BanditAI : MonoBehaviour {
     [SerializeField] private float attackRadius = 1.5f;
     [SerializeField] private float attackRate = 1.0f;
 
+    [Header("Настройки Атаки")]
+    [SerializeField] private LayerMask playerLayer; // Слой игрока
+    [SerializeField] private int attackDamage = 20; // Урон, наносимый бандитом
+    [SerializeField] private float banditDamageDelay = 0.3f; // Задержка перед нанесением урона
+    [SerializeField] private Vector2 attackOffset = new Vector2(0.5f, 0f); // Смещение точки проверки атаки
+
     private Animator _animator;
     private Rigidbody2D _rb;
     private Transform _player;
@@ -21,6 +29,8 @@ public class BanditAI : MonoBehaviour {
     private bool _isFacingRight = false;
     private float _nextAttackTime = 0f;
     private bool _isDead = false;
+
+    public bool IsDead => _isDead;
 
     void Start () {
         _animator = GetComponent<Animator>();
@@ -57,7 +67,7 @@ public class BanditAI : MonoBehaviour {
 
     void IdleState()
     {
-        _rb.linearVelocity = new Vector2(0, _rb.linearVelocity.y);
+        _rb.linearVelocity = Vector2.zero;
         _animator.SetInteger(AnimState, 0);
     }
 
@@ -78,7 +88,25 @@ public class BanditAI : MonoBehaviour {
 
         if (!(Time.time >= _nextAttackTime)) return;
         _animator.SetTrigger(Attack);
+        StartCoroutine(ApplyBanditDamageAfterDelay(attackRadius, attackDamage)); // Запускаем корутину для нанесения урона с задержкой
         _nextAttackTime = Time.time + 1f / attackRate;
+    }
+
+    // Корутина для отложенного нанесения урона игроку
+    private IEnumerator ApplyBanditDamageAfterDelay(float radius, int damage)
+    {
+        yield return new WaitForSeconds(banditDamageDelay);
+
+        Vector2 currentAttackOffset = _isFacingRight ? attackOffset : new Vector2(-attackOffset.x, attackOffset.y);
+        Vector2 attackOrigin = (Vector2)transform.position + currentAttackOffset;
+
+        Collider2D hitPlayer = Physics2D.OverlapCircle(attackOrigin, radius, playerLayer);
+
+        if (hitPlayer)
+        {
+            IDamageable playerDamageable = hitPlayer.GetComponent<IDamageable>();
+            playerDamageable?.TakeDamage(damage);
+        }
     }
 
     void FindPlayer()

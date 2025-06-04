@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - Wall
+  - TimerText
   layers:
   - Default
   - TransparentFX
@@ -16,7 +17,7 @@ TagManager:
   - Enemy
   - Wall
   - 
-  - 
+  - Player's projectile
   - 
   - 
   - 

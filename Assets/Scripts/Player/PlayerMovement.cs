@@ -29,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private bool _isJumping = false;
     private float _rollTimer = 0f;
     private Vector2 _rollDirection = Vector2.zero;
+    private bool _isBlocking = false;
 
     private void Awake()
     {
@@ -40,7 +41,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        FacingDirection = _playerInput.AimDirection;
+        if (_playerInput.MoveInput.sqrMagnitude > 0.01f)
+        {
+            FacingDirection = _playerInput.MoveInput.normalized;
+        }
+        else
+        {
+            FacingDirection = _playerInput.AimDirection;
+        }
 
         HandleRollStart();
 
@@ -56,6 +64,12 @@ public class PlayerMovement : MonoBehaviour
     }
     private void HandleMovement()
     {
+        if (_isBlocking)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
         switch (IsRolling)
         {
             case false when !_isJumping:
@@ -136,5 +150,10 @@ public class PlayerMovement : MonoBehaviour
      private bool CanJump()
     {
          return !IsRolling && !_isJumping;
+    }
+
+    public void SetBlockingState(bool isBlocking)
+    {
+        _isBlocking = isBlocking;
     }
 }

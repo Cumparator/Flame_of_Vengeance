@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using FlameOfVengeance.Interfaces;
 using Player;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 [RequireComponent(typeof(PlayerAnimator))]
 [RequireComponent(typeof(PlayerInput))]
@@ -24,6 +26,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private PlayerStamina _playerStamina;
     private Rigidbody2D _rb;
     private bool _isDead = false;
+    [SerializeField] private float deathDelay = 3f;
 
     private void Awake()
     {
@@ -61,6 +64,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         {
             _currentHealth = 0;
             Die();
+
         }
         else
         {
@@ -108,10 +112,19 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             _rb.linearVelocity = Vector2.zero; 
             _rb.bodyType = RigidbodyType2D.Kinematic;
         }
-        
-        Destroy(gameObject, deathSequenceDuration); 
 
+        StartCoroutine(DeathRoutine());
         // Можно добавить вызов логики Game Over здесь или в HandleDeathAnimationEnd()
+    }
+
+    IEnumerator DeathRoutine()
+    {
+        // Ждём завершения анимации
+        yield return new WaitForSeconds(deathDelay);
+
+        // Уничтожаем объект и загружаем сцену
+        Destroy(gameObject);
+        SceneManager.LoadScene("GameOver");
     }
 
     private void SetPlayerComponentsEnabled(bool isEnabled)

@@ -113,7 +113,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!50 &50959880312528810
 Rigidbody2D:
   serializedVersion: 5
@@ -189,10 +189,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba8b435a8dc3f604e9a13c4acd7081c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
-  detectionRadius: 50
+  moveSpeed: 7
+  detectionRadius: 20
   attackRadius: 1.5
   attackRate: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  attackDamage: 10
+  banditDamageDelay: 0.5
+  attackOffset: {x: 0.5, y: 0}
 --- !u!114 &4402028942022540260
 MonoBehaviour:
   m_ObjectHideFlags: 0

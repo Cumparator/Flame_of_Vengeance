@@ -1,2 +1,16 @@
 fileFormatVersion: 2
 guid: b60c3a01f2c358b41b10cb8ec689e6d0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - banditPrefab: {fileID: 1463392086428580, guid: d4d7ef881aaa19947a0aa220c9e7136e,
+      type: 3}
+  - rangeEnemyPrefab: {fileID: 2729250772452287229, guid: 6ed71d702b3617b4cbdf998382a9ab40,
+      type: 3}
+  - player: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

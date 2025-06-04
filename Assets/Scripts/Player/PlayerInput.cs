@@ -143,16 +143,5 @@ public class PlayerInput : MonoBehaviour
         {
             AimDirection = MoveInput.normalized;
         }
-        else
-        {
-             if (_lastNonZeroRawLookInput != Vector2.zero)
-             {
-                  AimDirection = _lastNonZeroRawLookInput;
-             }
-             else if (_lastNonZeroMoveInput != Vector2.zero)
-             {
-                   AimDirection = _lastNonZeroMoveInput;
-             }
-        }
     }
 }
